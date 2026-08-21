@@ -49,3 +49,15 @@ npm run build:win
 3. 中间树按 `namespace:folder:key` 分层展开
 4. 勾选节点后点「批量删除」
 5. 右侧用 JSON 结构 / 表格 / 原始文本查看值
+
+## 宣传官网
+
+静态页在 `html/`，首页即可下载安装包：
+
+```bash
+cd /Users/xiaobai/DevEcoStudioProjects/redis-manager-desktop/html
+npx --yes serve .
+# 浏览器打开提示的本地地址
+```
+
+下载文件通过 `html/downloads/` 软链接指向 `dist/` 产物。重新打包后链接会自动指向新文件（文件名需保持一致）。
