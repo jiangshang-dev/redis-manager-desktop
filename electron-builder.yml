@@ -14,20 +14,20 @@ extraResources:
     filter:
       - '**/*'
 mac:
-  icon: build/icon.png
+  icon: icon.png
   category: public.app-category.developer-tools
   target:
     - dmg
     - zip
 win:
-  icon: build/icon.png
+  icon: icon.ico
   target:
     - nsis
 linux:
-  icon: build/icon.png
+  icon: icon.png
   target:
     - AppImage
 nsis:
-  installerIcon: build/icon.png
-  uninstallerIcon: build/icon.png
+  installerIcon: icon.ico
+  uninstallerIcon: icon.ico
   shortcutName: Redis Manager

@@ -22,14 +22,23 @@ npm run dev
 
 ## 打包
 
+本机是 Mac 时优先打 Mac 包，速度会快很多（本地已有 Electron，一般不用再下）：
+
 ```bash
 npm run build:mac
-# 产物在 dist/，应用图标使用 build/icon.png
+```
+
+打 Windows 包会额外下载 `electron-*-win32-*.zip`，国内默认走 GitHub 很慢。脚本已切到 npmmirror：
+
+```bash
+# 先 Ctrl+C 停掉当前慢下载，再重新执行
+npm run build:win
 ```
 
 图标文件：
 
-- `build/icon.png`：electron-builder 打包图标（Mac / Windows / Linux）
+- `build/icon.png`：Mac / Linux 打包图标
+- `build/icon.ico`：Windows / NSIS 安装包图标（`npm run gen:icons` 生成）
 - `resources/icon.png`：运行时窗口 / Dock 图标
 - `src/renderer/src/assets/logo.png`：界面左上角品牌图
 
