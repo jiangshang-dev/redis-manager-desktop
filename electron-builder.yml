@@ -1,0 +1,33 @@
+appId: com.redis.manager.desktop
+productName: Redis Manager
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.*'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/.idea/*'
+extraResources:
+  - from: resources/
+    to: resources/
+    filter:
+      - '**/*'
+mac:
+  icon: build/icon.png
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip
+win:
+  icon: build/icon.png
+  target:
+    - nsis
+linux:
+  icon: build/icon.png
+  target:
+    - AppImage
+nsis:
+  installerIcon: build/icon.png
+  uninstallerIcon: build/icon.png
+  shortcutName: Redis Manager
