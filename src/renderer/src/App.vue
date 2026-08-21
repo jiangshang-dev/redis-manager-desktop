@@ -7,6 +7,7 @@ import ConnectionPanel from './components/ConnectionPanel.vue'
 import ConnectionDialog from './components/ConnectionDialog.vue'
 import KeyExplorer from './components/KeyExplorer.vue'
 import KeyDetail from './components/KeyDetail.vue'
+import logoUrl from './assets/logo.png'
 
 const store = useRedisStore()
 const dialogVisible = ref(false)
@@ -65,10 +66,7 @@ async function onSaved(config: RedisConnectionConfig) {
   <div class="app-shell">
     <header class="app-header">
       <div class="brand">
-        <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#DC382C" />
-          <path d="M8 12h16v2.2H8V12Zm0 4.9h16V19H8v-2.1Zm0 4.9h10V24H8v-2.2Z" fill="white" />
-        </svg>
+        <img class="brand-mark" :src="logoUrl" alt="Redis Manager" />
         <div>
           <div class="brand-title">Redis <span>Manager</span></div>
           <div class="brand-sub">多连接 · 树形 Key · 批量删除 · JSON 查看</div>

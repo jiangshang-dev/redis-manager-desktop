@@ -10,10 +10,10 @@ import { redisService } from './redis-service'
 import type { RedisConnectionConfig } from '../shared/types'
 
 function resolveAppIcon(): string {
-  if (is.dev) {
-    return join(app.getAppPath(), 'resources/icon.png')
+  if (app.isPackaged) {
+    return join(process.resourcesPath, 'resources/icon.png')
   }
-  return join(process.resourcesPath, 'resources/icon.png')
+  return join(__dirname, '../../resources/icon.png')
 }
 
 function createWindow(): void {

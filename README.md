@@ -24,8 +24,14 @@ npm run dev
 
 ```bash
 npm run build:mac
-npm run build:win
+# 产物在 dist/，应用图标使用 build/icon.png
 ```
+
+图标文件：
+
+- `build/icon.png`：electron-builder 打包图标（Mac / Windows / Linux）
+- `resources/icon.png`：运行时窗口 / Dock 图标
+- `src/renderer/src/assets/logo.png`：界面左上角品牌图
 
 ## 使用说明
 
