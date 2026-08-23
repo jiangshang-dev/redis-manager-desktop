@@ -13,7 +13,7 @@
     "build:mac": "electron-vite build && env -u ELECTRON_RUN_AS_NODE ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/ electron-builder --mac --arm64 --x64",
     "build:win": "npm run gen:icons && electron-vite build && env -u ELECTRON_RUN_AS_NODE ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/ electron-builder --win --x64",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && vue-tsc --noEmit -p tsconfig.web.json",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "node node_modules/electron/install.js && electron-builder install-app-deps"
   },
   "dependencies": {
     "ioredis": "^5.6.1"
