@@ -1,7 +1,6 @@
 const downloads = {
-  macArm: './downloads/Redis-Manager-1.0.0-mac-arm64.dmg',
-  macIntel: './downloads/Redis-Manager-1.0.0-mac-intel.dmg',
-  windows: './downloads/Redis-Manager-Setup-1.0.0-windows.exe'
+  mac: 'https://myagentscope.oss-cn-beijing.aliyuncs.com/Redis%20Manager-1.0.0-arm64.dmg',
+  windows: 'https://myagentscope.oss-cn-beijing.aliyuncs.com/Redis%20Manager%20Setup%201.0.0.exe'
 }
 
 function detectPlatform() {
@@ -9,15 +8,6 @@ function detectPlatform() {
   const platform = navigator.platform || ''
   const isMac = /Mac|Macintosh|MacIntel|MacPPC/i.test(platform) || /Mac OS X/i.test(ua)
   const isWin = /Win/i.test(platform) || /Windows/i.test(ua)
-
-  if (isMac) {
-    const intelHint = /Intel/i.test(ua)
-    return {
-      label: intelHint ? 'macOS Intel · v1.0.0' : 'Apple Silicon · v1.0.0',
-      href: intelHint ? downloads.macIntel : downloads.macArm,
-      button: intelHint ? '下载 macOS（Intel）' : '下载 macOS（Apple Silicon）'
-    }
-  }
 
   if (isWin) {
     return {
@@ -27,9 +17,17 @@ function detectPlatform() {
     }
   }
 
+  if (isMac) {
+    return {
+      label: 'macOS Apple Silicon · v1.0.0',
+      href: downloads.mac,
+      button: '下载 macOS（Apple Silicon）'
+    }
+  }
+
   return {
-    label: '通用推荐：Apple Silicon · v1.0.0',
-    href: downloads.macArm,
+    label: 'macOS Apple Silicon · v1.0.0',
+    href: downloads.mac,
     button: '下载 macOS（Apple Silicon）'
   }
 }
