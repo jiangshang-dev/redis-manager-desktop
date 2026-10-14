@@ -341,6 +341,29 @@ textarea {
 .json-bool { color: #d4b3ff; }
 .json-null { color: #8b98a8; }
 .json-toggle { color: var(--muted); cursor: pointer; margin-right: 4px; }
+.json-editable { cursor: text; border-bottom: 1px dashed transparent; }
+.json-editable:hover { border-bottom-color: var(--redis-red-soft); }
+.json-edit {
+  min-width: 160px;
+  max-width: min(520px, 100%);
+  border: 1px solid var(--redis-red);
+  border-radius: 4px;
+  background: #0d131a;
+  font: inherit;
+  line-height: 1.5;
+  padding: 0 6px;
+}
+textarea.json-edit { display: block; width: min(520px, 100%); margin-top: 4px; }
+.json-error { color: #ff8d8d; margin-left: 6px; }
+.json-panel {
+  background: #0d131a;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+.json-edit-bar { margin-bottom: 8px; }
+.edit-row { display: flex; gap: 8px; align-items: flex-start; }
+.edit-row .el-input, .edit-row .el-textarea { flex: 1; }
 
 .conn-item {
   padding: 10px 12px;

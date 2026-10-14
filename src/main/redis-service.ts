@@ -383,6 +383,40 @@ export class RedisService {
     await this.get(id).set(key, value)
   }
 
+  async setHashField(id: string, key: string, field: string, value: string): Promise<void> {
+    await this.get(id).hset(key, field, value)
+  }
+
+  async setListItem(id: string, key: string, index: number, value: string): Promise<void> {
+    await this.get(id).lset(key, index, value)
+  }
+
+  async replaceSetMember(id: string, key: string, previous: string, next: string): Promise<void> {
+    if (previous === next) return
+    const client = this.get(id)
+    await client.sadd(key, next)
+    await client.srem(key, previous)
+  }
+
+  async setZSetMember(id: string, key: string, member: string, score: number, previous?: string): Promise<void> {
+    const client = this.get(id)
+    await client.zadd(key, score, member)
+    if (previous !== undefined && previous !== member) await client.zrem(key, previous)
+  }
+
+  async setJson(id: string, key: string, value: string): Promise<void> {
+    const client = this.get(id)
+    try {
+      await client.call('JSON.SET', key, '$', value)
+    } catch (error) {
+      try {
+        await client.call('JSON.SET', key, '.', value)
+      } catch {
+        throw error
+      }
+    }
+  }
+
   async expire(id: string, key: string, ttl: number): Promise<void> {
     const client = this.get(id)
     if (ttl < 0) {

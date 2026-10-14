@@ -313,12 +313,37 @@ export const useRedisStore = defineStore('redis', {
     async saveString(value: string) {
       if (!this.activeId || !this.selectedKey) return
       await window.redisAPI.setString(this.activeId, this.selectedKey, value)
-      await this.openKey(this.selectedKey)
+      await this.loadKey(this.selectedKey)
+    },
+    async saveHashField(field: string, value: string) {
+      if (!this.activeId || !this.selectedKey) return
+      await window.redisAPI.setHashField(this.activeId, this.selectedKey, field, value)
+      await this.loadKey(this.selectedKey)
+    },
+    async saveListItem(index: number, value: string) {
+      if (!this.activeId || !this.selectedKey) return
+      await window.redisAPI.setListItem(this.activeId, this.selectedKey, index, value)
+      await this.loadKey(this.selectedKey)
+    },
+    async saveSetMember(previous: string, next: string) {
+      if (!this.activeId || !this.selectedKey) return
+      await window.redisAPI.replaceSetMember(this.activeId, this.selectedKey, previous, next)
+      await this.loadKey(this.selectedKey)
+    },
+    async saveZSetMember(member: string, score: number, previous?: string) {
+      if (!this.activeId || !this.selectedKey) return
+      await window.redisAPI.setZSetMember(this.activeId, this.selectedKey, member, score, previous)
+      await this.loadKey(this.selectedKey)
+    },
+    async saveJson(value: string) {
+      if (!this.activeId || !this.selectedKey) return
+      await window.redisAPI.setJson(this.activeId, this.selectedKey, value)
+      await this.loadKey(this.selectedKey)
     },
     async saveTtl(ttl: number) {
       if (!this.activeId || !this.selectedKey) return
       await window.redisAPI.expire(this.activeId, this.selectedKey, ttl)
-      await this.openKey(this.selectedKey)
+      await this.loadKey(this.selectedKey)
     },
     async executeCommand(raw: string): Promise<RedisCommandResult[]> {
       if (!this.activeId || !this.isConnected) throw new Error('请先连接 Redis')

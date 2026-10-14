@@ -140,6 +140,27 @@ handle('redis:deleteKeys', (_event, id: unknown, keys: unknown) =>
 handle('redis:setString', (_event, id: unknown, key: unknown, value: unknown) =>
   redisService.setString(String(id), String(key), String(value))
 )
+handle('redis:setHashField', (_event, id: unknown, key: unknown, field: unknown, value: unknown) =>
+  redisService.setHashField(String(id), String(key), String(field), String(value))
+)
+handle('redis:setListItem', (_event, id: unknown, key: unknown, index: unknown, value: unknown) =>
+  redisService.setListItem(String(id), String(key), Number(index), String(value))
+)
+handle('redis:replaceSetMember', (_event, id: unknown, key: unknown, previous: unknown, next: unknown) =>
+  redisService.replaceSetMember(String(id), String(key), String(previous), String(next))
+)
+handle('redis:setZSetMember', (_event, id: unknown, key: unknown, member: unknown, score: unknown, previous: unknown) =>
+  redisService.setZSetMember(
+    String(id),
+    String(key),
+    String(member),
+    Number(score),
+    previous === undefined || previous === null ? undefined : String(previous)
+  )
+)
+handle('redis:setJson', (_event, id: unknown, key: unknown, value: unknown) =>
+  redisService.setJson(String(id), String(key), String(value))
+)
 handle('redis:expire', (_event, id: unknown, key: unknown, ttl: unknown) =>
   redisService.expire(String(id), String(key), Number(ttl))
 )

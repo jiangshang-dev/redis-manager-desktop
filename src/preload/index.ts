@@ -23,6 +23,15 @@ const api = {
     ipcRenderer.invoke('redis:deleteKeys', id, clone(keys)),
   setString: (id: string, key: string, value: string) =>
     ipcRenderer.invoke('redis:setString', id, key, value),
+  setHashField: (id: string, key: string, field: string, value: string) =>
+    ipcRenderer.invoke('redis:setHashField', id, key, field, value),
+  setListItem: (id: string, key: string, index: number, value: string) =>
+    ipcRenderer.invoke('redis:setListItem', id, key, index, value),
+  replaceSetMember: (id: string, key: string, previous: string, next: string) =>
+    ipcRenderer.invoke('redis:replaceSetMember', id, key, previous, next),
+  setZSetMember: (id: string, key: string, member: string, score: number, previous?: string) =>
+    ipcRenderer.invoke('redis:setZSetMember', id, key, member, score, previous),
+  setJson: (id: string, key: string, value: string) => ipcRenderer.invoke('redis:setJson', id, key, value),
   expire: (id: string, key: string, ttl: number) => ipcRenderer.invoke('redis:expire', id, key, ttl),
   rename: (id: string, key: string, nextKey: string) =>
     ipcRenderer.invoke('redis:rename', id, key, nextKey),
