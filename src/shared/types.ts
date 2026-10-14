@@ -50,3 +50,11 @@ export type ScanResult = {
   keys: string[]
   durationMs: number
 }
+
+export type RedisCommandResult = {
+  ok: boolean
+  command: string
+  output: string
+  durationMs: number
+  selectedDb?: number
+}

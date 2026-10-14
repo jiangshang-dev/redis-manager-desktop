@@ -25,7 +25,8 @@ const api = {
     ipcRenderer.invoke('redis:setString', id, key, value),
   expire: (id: string, key: string, ttl: number) => ipcRenderer.invoke('redis:expire', id, key, ttl),
   rename: (id: string, key: string, nextKey: string) =>
-    ipcRenderer.invoke('redis:rename', id, key, nextKey)
+    ipcRenderer.invoke('redis:rename', id, key, nextKey),
+  execute: (id: string, command: string) => ipcRenderer.invoke('redis:execute', id, command)
 }
 
 export type RedisAPI = typeof api

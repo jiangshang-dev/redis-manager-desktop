@@ -91,11 +91,11 @@ function parsedCell(text: string): unknown | null {
 </script>
 
 <template>
-  <section class="panel">
+  <section class="key-detail">
     <div class="panel-head">
       <div>
         <div class="panel-title">值查看器</div>
-        <div class="brand-sub">{{ detail?.key || '选择一个 Key 查看内容' }}</div>
+        <div class="brand-sub">{{ detail?.key || store.selectedKey || '选择一个 Key 查看内容' }}</div>
       </div>
       <div class="toolbar" v-if="detail?.exists">
         <el-button size="small" @click="store.refreshKey()">刷新当前值</el-button>
@@ -108,8 +108,7 @@ function parsedCell(text: string): unknown | null {
     </div>
     <div class="panel-body" style="padding: 12px" v-loading="store.loadingDetail">
       <div v-if="!detail" class="empty-wrap">
-        从左侧树中选择 Key。<br />
-        `demo1:demo2:demo3` 会按分隔符展开成文件夹。
+        {{ store.loadingDetail ? '正在读取…' : '该 Key 尚未加载。' }}
       </div>
       <div v-else-if="!detail.exists" class="empty-wrap">该 Key 不存在，可能已被删除。</div>
       <template v-else>

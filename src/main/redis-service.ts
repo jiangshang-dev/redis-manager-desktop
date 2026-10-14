@@ -2,14 +2,32 @@ import Redis from 'ioredis'
 import type {
   HashRow,
   KeyDetail,
+  RedisCommandResult,
   RedisConnectionConfig,
   RedisInfo,
   ScanResult,
   StreamRow,
   ZSetRow
 } from '../shared/types'
+import { formatCommand, parseCommandScript } from '../shared/redis-command'
 
 const PAGE_SIZE = 200
+const MAX_OUTPUT = 200_000
+const MAX_BLOCK_SECONDS = 30
+
+const CONNECTION_BLOCKED = new Set([
+  'subscribe',
+  'psubscribe',
+  'ssubscribe',
+  'unsubscribe',
+  'punsubscribe',
+  'sunsubscribe',
+  'monitor',
+  'sync',
+  'psync',
+  'quit',
+  'hello'
+])
 
 type ClientEntry = {
   client: Redis
@@ -44,6 +62,88 @@ function parseInfo(text: string): Record<string, string> {
     map[line.slice(0, idx).trim()] = line.slice(idx + 1).trim()
   }
   return map
+}
+
+function blockingTimeout(args: string[]): number | null {
+  const name = args[0]?.toLowerCase() ?? ''
+  const rest = args.slice(1)
+  if (['blpop', 'brpop', 'brpoplpush', 'blmove', 'bzpopmin', 'bzpopmax'].includes(name)) {
+    if (!rest.length) return null
+    const timeout = Number(rest[rest.length - 1])
+    return Number.isFinite(timeout) ? timeout : null
+  }
+  if (name === 'blmpop' || name === 'bzmpop') {
+    if (!rest.length) return null
+    const timeout = Number(rest[0])
+    return Number.isFinite(timeout) ? timeout : null
+  }
+  if (name === 'xread' || name === 'xreadgroup') {
+    const blockAt = rest.findIndex((item) => item.toLowerCase() === 'block')
+    if (blockAt < 0) return null
+    const timeoutMs = Number(rest[blockAt + 1])
+    return Number.isFinite(timeoutMs) ? timeoutMs / 1000 : null
+  }
+  return null
+}
+
+function assertExecutable(args: string[]): void {
+  const name = args[0]?.toLowerCase() ?? ''
+  const sub = args[1]?.toLowerCase() ?? ''
+  if (CONNECTION_BLOCKED.has(name)) {
+    throw new Error('该命令会切换协议、进入订阅或断开当前连接，命令行暂不支持。')
+  }
+  if (name === 'client' && sub === 'reply') {
+    throw new Error('CLIENT REPLY 会让当前连接停止返回结果，命令行暂不支持。')
+  }
+  const timeout = blockingTimeout(args)
+  if (timeout === null) return
+  if (timeout <= 0 || timeout > MAX_BLOCK_SECONDS) {
+    throw new Error(`阻塞命令的超时需要大于 0 且不超过 ${MAX_BLOCK_SECONDS} 秒。`)
+  }
+}
+
+function limitOutput(text: string): string {
+  if (text.length <= MAX_OUTPUT) return text
+  return `${text.slice(0, MAX_OUTPUT)}\n... 输出已截断，共 ${text.length} 个字符`
+}
+
+function formatReply(value: unknown, nested = false): string {
+  if (value === null || value === undefined) return '(nil)'
+  if (typeof value === 'string') {
+    if (!nested && value === '') return '""'
+    return nested ? JSON.stringify(value) : value
+  }
+  if (typeof value === 'number') return Number.isInteger(value) ? `(integer) ${value}` : String(value)
+  if (typeof value === 'bigint') return `(integer) ${value}`
+  if (typeof value === 'boolean') return value ? '(integer) 1' : '(integer) 0'
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(value)) {
+    const text = value.toString('utf8')
+    return nested ? JSON.stringify(text) : text || '""'
+  }
+  if (value instanceof Uint8Array) {
+    const text = Buffer.from(value).toString('utf8')
+    return nested ? JSON.stringify(text) : text || '""'
+  }
+  if (Array.isArray(value)) {
+    if (!value.length) return '(empty array)'
+    return value
+      .map((item, index) => {
+        const prefix = `${index + 1}) `
+        const body = formatReply(item, true)
+        const [first, ...rest] = body.split('\n')
+        const pad = ' '.repeat(prefix.length)
+        return [prefix + first, ...rest.map((line) => pad + line)].join('\n')
+      })
+      .join('\n')
+  }
+  if (value instanceof Map) {
+    return formatReply([...value.entries()], true)
+  }
+  try {
+    return JSON.stringify(value, null, 2)
+  } catch {
+    return String(value)
+  }
 }
 
 function toRowsFromWithScores(raw: string[]): ZSetRow[] {
@@ -294,6 +394,51 @@ export class RedisService {
 
   async rename(id: string, key: string, nextKey: string): Promise<void> {
     await this.get(id).rename(key, nextKey)
+  }
+
+  async execute(id: string, raw: string): Promise<RedisCommandResult[]> {
+    if (raw.length > 1_000_000) throw new Error('命令过长')
+    const commands = parseCommandScript(raw)
+    if (!commands.length) throw new Error('请输入 Redis 命令')
+
+    const client = this.get(id)
+    const results: RedisCommandResult[] = []
+    for (let index = 0; index < commands.length; index += 1) {
+      const args = commands[index]
+      if (!args?.length) continue
+      const command = formatCommand(args)
+      const started = Date.now()
+      try {
+        assertExecutable(args)
+        const reply = await client.call(args[0], ...args.slice(1))
+        const result: RedisCommandResult = {
+          ok: true,
+          command,
+          output: limitOutput(formatReply(reply)),
+          durationMs: Date.now() - started
+        }
+        if (args[0].toLowerCase() === 'select') {
+          const db = Number(args[1])
+          if (Number.isInteger(db) && db >= 0) {
+            const entry = this.clients.get(id)
+            if (entry) entry.config.db = db
+            result.selectedDb = db
+          }
+        }
+        results.push(result)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        const pending = index < commands.length - 1 ? '\n后续命令未执行' : ''
+        results.push({
+          ok: false,
+          command,
+          output: `${message}${pending}`,
+          durationMs: Date.now() - started
+        })
+        break
+      }
+    }
+    return results
   }
 }
 

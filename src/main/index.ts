@@ -146,3 +146,6 @@ handle('redis:expire', (_event, id: unknown, key: unknown, ttl: unknown) =>
 handle('redis:rename', (_event, id: unknown, key: unknown, nextKey: unknown) =>
   redisService.rename(String(id), String(key), String(nextKey))
 )
+handle('redis:execute', (_event, id: unknown, command: unknown) =>
+  redisService.execute(String(id), String(command ?? ''))
+)
